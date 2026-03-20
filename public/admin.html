@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <!-- 已登录且非 #login 时抢先隐藏登录卡片，避免模块执行前闪一下登录区 -->
+  <script>
+    (function () {
+      try {
+        if (
+          localStorage.getItem("blog_admin_token") &&
+          window.location.hash !== "#login"
+        ) {
+          document.documentElement.classList.add("admin-token-present");
+        }
+      } catch (_) {}
+    })();
+  </script>
+  <title>文章列表 · 写作</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-flat">
+  <div class="bg" aria-hidden="true"></div>
+  <!-- 固定顶部横幅提示（保存 / 上传成功等），避免用户滚到编辑器时看不到 main-msg -->
+  <div
+    id="admin-toast"
+    class="admin-toast"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    hidden
+  ></div>
+  <div class="wrap admin-wrap">
+    <header class="site-header">
+      <div class="brand brand--home-meta">
+        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
+          <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
+        </a>
+        <div class="brand-main">
+          <div class="brand-greeting-block">
+            <a class="brand-text" href="index.html">
+              <span id="brand-greeting">博客</span>
+            </a>
+            <p class="brand-bio" id="brand-bio" hidden></p>
+          </div>
+          <div class="brand-meta" aria-live="polite">
+            <time id="home-datetime" datetime=""></time>
+            <span class="brand-meta__sep" aria-hidden="true">·</span>
+            <span id="home-weather">天气加载中…</span>
+          </div>
+        </div>
+      </div>
+      <nav class="nav site-nav" id="site-nav" aria-label="主导航">
+        <a href="index.html" data-nav-page="home">文章</a>
+        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
+        <a href="博客说明.html" data-nav-page="docs">说明</a>
+        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
+        <button type="button" class="nav-btn" id="btn-logout" data-nav-auth hidden>退出</button>
+      </nav>
+    </header>
+
+    <section
+      id="panel-auth"
+      class="auth-panel card flat-card"
+      aria-label="账户"
+    >
+      <div class="auth-tabstrip" role="tablist" aria-label="登录或注册">
+        <button
+          type="button"
+          class="auth-tab is-active"
+          id="tab-login"
+          role="tab"
+          aria-selected="true"
+          aria-controls="form-login-wrap"
+        >
+          登录
+        </button>
+        <button
+          type="button"
+          class="auth-tab"
+          id="tab-register"
+          role="tab"
+          aria-selected="false"
+          aria-controls="form-register-wrap"
+        >
+          注册
+        </button>
+      </div>
+
+      <div
+        id="form-login-wrap"
+        class="auth-form is-active"
+        role="tabpanel"
+        aria-labelledby="tab-login"
+      >
+        <div id="login-msg"></div>
+        <div class="admin-field">
+          <label for="username">用户名</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            autocomplete="username"
+            placeholder="登录名"
+          />
+        </div>
+        <div class="admin-field">
+          <label for="password">密码</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+          />
+        </div>
+        <button type="button" class="btn btn-primary auth-submit" id="btn-login">
+          登录
+        </button>
+      </div>
+
+      <div
+        id="form-register-wrap"
+        class="auth-form"
+        role="tabpanel"
+        aria-labelledby="tab-register"
+        hidden
+      >
+        <div id="register-msg"></div>
+        <div class="admin-field">
+          <label for="reg-username">用户名</label>
+          <input
+            type="text"
+            id="reg-username"
+            name="reg-username"
+            autocomplete="username"
+            placeholder="2～32 位，字母数字下划线或中文"
+          />
+        </div>
+        <div class="admin-field">
+          <label for="reg-password">密码</label>
+          <input
+            type="password"
+            id="reg-password"
+            name="reg-password"
+            autocomplete="new-password"
+            placeholder="至少 6 位"
+          />
+        </div>
+        <div class="admin-field">
+          <label for="reg-password2">确认密码</label>
+          <input
+            type="password"
+            id="reg-password2"
+            name="reg-password2"
+            autocomplete="new-password"
+            placeholder="再次输入"
+          />
+        </div>
+        <button type="button" class="btn btn-primary auth-submit" id="btn-register">
+          注册
+        </button>
+      </div>
+    </section>
+
+    <main id="panel-main" hidden>
+      <div id="main-msg"></div>
+      <section
+        class="admin-post-list-panel card flat-card"
+        aria-labelledby="admin-post-list-title"
+      >
+        <header class="admin-post-list-panel__header">
+          <h2 id="admin-post-list-title" class="admin-post-list-panel__title">
+            文章列表
+          </h2>
+          <div class="admin-post-list-panel__tools">
+            <a href="write.html" class="admin-post-new">
+              <svg class="admin-post-new__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span>新建文章</span>
+            </a>
+            <button
+              type="button"
+              class="admin-post-refresh"
+              id="btn-refresh"
+              aria-label="刷新列表"
+              title="刷新列表"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                <path d="M21 3v7h-7" />
+              </svg>
+            </button>
+          </div>
+        </header>
+        <ul
+          id="admin-post-list"
+          class="admin-post-list"
+          aria-live="polite"
+        ></ul>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="js/admin-app.js"></script>
+</body>
+</html>

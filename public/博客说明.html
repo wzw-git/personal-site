@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="个人博客：架构说明、技术栈、Docker 部署流程、安全与运维指南" />
+  <title>说明与部署指南 · 博客</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* 说明页：目录与图表区域（与 theme-flat 协调） */
+    .doc-page .doc-lead {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.65;
+      margin-bottom: 1.5rem;
+    }
+    .doc-page .doc-toc {
+      margin: 1.25rem 0 2rem;
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius, 4px);
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .doc-page .doc-toc h2 {
+      margin-top: 0;
+      font-size: 0.95rem;
+    }
+    .doc-page .doc-toc ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.2rem;
+      column-count: 2;
+      column-gap: 1.5rem;
+    }
+    @media (max-width: 720px) {
+      .doc-page .doc-toc ul {
+        column-count: 1;
+      }
+    }
+    .doc-page .doc-toc a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .doc-page .doc-toc a:hover {
+      text-decoration: underline;
+    }
+    .doc-page .doc-diagram-wrap {
+      margin: 1.35rem 0;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius, 4px);
+      background: rgba(3, 5, 16, 0.85);
+    }
+    .doc-page .doc-diagram-caption {
+      margin: 0 0 0.75rem;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .doc-page .doc-mermaid-fallback {
+      display: none;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      color: var(--muted);
+      margin: 0;
+    }
+    .doc-page .doc-mermaid-fallback.is-visible {
+      display: block;
+    }
+    .doc-page .doc-mermaid-fallback[hidden] {
+      display: none !important;
+    }
+    .doc-page table.doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      margin: 1rem 0;
+    }
+    .doc-page table.doc-table th,
+    .doc-page table.doc-table td {
+      border: 1px solid var(--stroke);
+      padding: 0.5rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    .doc-page table.doc-table th {
+      background: rgba(0, 245, 212, 0.06);
+      color: var(--text);
+    }
+    .doc-page .doc-note {
+      margin: 1rem 0;
+      padding: 0.75rem 1rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(0, 245, 212, 0.06);
+      font-size: 0.92rem;
+    }
+  </style>
+</head>
+<body class="theme-flat">
+  <div class="bg" aria-hidden="true"></div>
+  <div class="wrap wrap--narrow doc-page">
+    <header class="site-header">
+      <div class="brand brand--home-meta">
+        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
+          <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
+        </a>
+        <div class="brand-main">
+          <div class="brand-greeting-block">
+            <a class="brand-text" href="index.html">
+              <span id="brand-greeting">博客</span>
+            </a>
+            <p class="brand-bio" id="brand-bio" hidden></p>
+          </div>
+          <div class="brand-meta" aria-live="polite">
+            <time id="home-datetime" datetime=""></time>
+            <span class="brand-meta__sep" aria-hidden="true">·</span>
+            <span id="home-weather">天气加载中…</span>
+          </div>
+        </div>
+      </div>
+      <nav class="nav site-nav" id="site-nav" aria-label="主导航">
+        <a href="index.html" data-nav-page="home">文章</a>
+        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
+        <a href="博客说明.html" data-nav-page="docs" aria-current="page">说明</a>
+        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
+        <button type="button" class="nav-btn" id="nav-logout" data-nav-auth hidden>退出</button>
+      </nav>
+    </header>
+
+    <main class="prose prose--static">
+      <h1 id="top">说明与部署指南</h1>
+      <p class="doc-lead">
+        本文档描述本站的<strong>系统架构</strong>、<strong>技术栈与工具</strong>、<strong>Docker Compose 部署流程</strong>、<strong>环境变量</strong>、<strong>安全要点</strong>及日常使用。根目录另有纯文本
+        <code>部署说明.txt</code>（适合终端快速查阅）与 <code>SECURITY.md</code>（安全专项）。
+      </p>
+
+      <nav class="doc-toc" aria-label="本页目录">
+        <h2>本页目录</h2>
+        <ul>
+          <li><a href="#overview">1. 系统概览</a></li>
+          <li><a href="#stack">2. 技术栈与工具</a></li>
+          <li><a href="#architecture">3. 架构与请求路径</a></li>
+          <li><a href="#compose-flow">4. Compose 启动顺序</a></li>
+          <li><a href="#auth-flow">5. 登录与鉴权流程</a></li>
+          <li><a href="#deploy-steps">6. 部署操作步骤</a></li>
+          <li><a href="#env">7. 环境变量说明</a></li>
+          <li><a href="#security">8. 安全与生产检查</a></li>
+          <li><a href="#features">9. 功能与页面</a></li>
+          <li><a href="#structure">10. 仓库目录结构</a></li>
+          <li><a href="#dev-api">11. 本地开发 API</a></li>
+          <li><a href="#troubleshoot">12. 常见问题</a></li>
+        </ul>
+      </nav>
+
+      <h2 id="overview">1. 系统概览</h2>
+      <p>
+        本站为「静态前端 + REST API + 关系型数据库」的经典三层结构：<strong>MySQL 8</strong> 持久化用户、文章、标签；<strong>Node.js（Express）</strong> 提供
+        <code>/api/*</code> 接口（鉴权、CRUD、上传、天气代理）；<strong>Nginx</strong> 托管 <code>public/</code> 下的 HTML/CSS/JS，并将
+        <code>/api/</code> 反向代理到 API 容器。三者由 <strong>Docker Compose</strong> 编排，便于单机一键启动与迁移。
+      </p>
+      <div class="doc-note">
+        <strong>重要：</strong>Nginx 只负责静态文件与反代，<strong>不能替代 MySQL</strong>。数据库始终由独立容器（或外部 MySQL 实例）运行。
+      </div>
+
+      <h2 id="stack">2. 技术栈与工具</h2>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>层次</th>
+            <th>技术 / 工具</th>
+            <th>用途</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>运行时</td>
+            <td>Node.js 18+</td>
+            <td>执行 API 服务（<code>server/src/index.js</code>）</td>
+          </tr>
+          <tr>
+            <td>Web 框架</td>
+            <td>Express 4</td>
+            <td>路由、中间件、JSON 解析、错误处理</td>
+          </tr>
+          <tr>
+            <td>数据库</td>
+            <td>MySQL 8.0（mysql2 驱动）</td>
+            <td>用户、文章、标签多对多、迁移脚本</td>
+          </tr>
+          <tr>
+            <td>容器</td>
+            <td>Docker、Docker Compose</td>
+            <td>镜像构建、服务依赖、健康检查、卷挂载</td>
+          </tr>
+          <tr>
+            <td>反向代理 / 静态</td>
+            <td>Nginx（Alpine 镜像）</td>
+            <td><code>root</code> 指向 <code>public/</code>，<code>location /api/</code> 反代 API；安全响应头</td>
+          </tr>
+          <tr>
+            <td>鉴权</td>
+            <td>jsonwebtoken（HS256）、bcryptjs</td>
+            <td>Bearer Token、密码哈希</td>
+          </tr>
+          <tr>
+            <td>安全中间件</td>
+            <td>helmet、cors、express-rate-limit</td>
+            <td>HTTP 头、跨域配置、登录/注册/上传/写文限流</td>
+          </tr>
+          <tr>
+            <td>上传</td>
+            <td>multer</td>
+            <td>multipart 落盘；结合魔数校验防伪造图片</td>
+          </tr>
+          <tr>
+            <td>前端</td>
+            <td>原生 ES Modules、Marked、DOMPurify（UMD）</td>
+            <td>Markdown 渲染与 XSS 净化；各页 <code>type="module"</code> 脚本</td>
+          </tr>
+          <tr>
+            <td>字体</td>
+            <td>Google Fonts（Orbitron、Rajdhani、Share Tech Mono 等）</td>
+            <td>赛博朋克主题排版（<code>theme-flat</code>）</td>
+          </tr>
+          <tr>
+            <td>可选上游</td>
+            <td>聚合数据「简单天气」HTTPS API</td>
+            <td>服务端代理 <code>/api/climate</code>，密钥仅存环境变量</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="architecture">3. 架构与请求路径</h2>
+      <p>下图描述浏览器、Nginx、API、MySQL 及外部天气服务之间的关系（需联网加载 Mermaid；若图表空白，请查看下方文字版）。</p>
+      <div class="doc-diagram-wrap">
+        <p class="doc-diagram-caption">图 3-1 逻辑架构</p>
+        <pre class="doc-mermaid-fallback" id="doc-fallback-arch" hidden>浏览器 ──► Nginx ──► public/ 静态文件
+              │
+              └──► /api/* ──► Node Express ──► MySQL
+                         │
+                         └──►（可选）聚合数据天气 API</pre>
+        <div class="mermaid">
+flowchart TB
+  subgraph browser [浏览器]
+    U[访客/作者]
+  end
+  subgraph nginx [Nginx 容器]
+    S[静态 HTML/CSS/JS]
+    P[反向代理 /api/]
+  end
+  subgraph api [API 容器 Node]
+    E[Express 路由]
+    J[JWT 校验]
+    M[MySQL 连接池]
+  end
+  subgraph db [MySQL 容器]
+    D[(blog 库)]
+  end
+  subgraph ext [外网可选]
+    W[聚合天气 HTTPS]
+  end
+  U -->|GET 页面资源| S
+  U -->|fetch /api/*| P
+  P --> E
+  E --> J
+  J --> M
+  M --> D
+  E -->|服务端 fetch| W
+        </div>
+      </div>
+
+      <h2 id="compose-flow">4. Compose 启动顺序</h2>
+      <p>Compose 中 <code>api</code> 依赖 MySQL 健康检查；<code>nginx</code> 依赖 API 健康检查，避免「先起反代、API 未就绪」导致大量 502。</p>
+      <div class="doc-diagram-wrap">
+        <p class="doc-diagram-caption">图 4-1 容器依赖与健康检查</p>
+        <div class="mermaid">
+flowchart LR
+  A[mysql 启动] --> B{healthcheck ping}
+  B -->|通过| C[api 构建并启动]
+  C --> D{GET /api/health}
+  D -->|200| E[nginx 启动]
+  D -->|失败| C
+        </div>
+      </div>
+
+      <h2 id="auth-flow">5. 登录与鉴权流程</h2>
+      <div class="doc-diagram-wrap">
+        <p class="doc-diagram-caption">图 5-1 登录后访问受保护接口</p>
+        <div class="mermaid">
+sequenceDiagram
+  participant B as 浏览器
+  participant N as Nginx
+  participant A as API
+  participant D as MySQL
+  B->>N: POST /api/auth/login JSON
+  N->>A: 转发
+  A->>D: 查询用户与密码哈希
+  D-->>A: 行数据
+  A-->>B: 200 token + role
+  Note over B: localStorage 存 Bearer
+  B->>N: GET /api/me/posts Authorization Bearer
+  N->>A: 转发头
+  A->>A: jwt.verify HS256
+  A->>D: 按 user id 查文章
+  A-->>B: JSON 列表
+        </div>
+      </div>
+
+      <h2 id="deploy-steps">6. 部署操作步骤</h2>
+      <ol>
+        <li><strong>准备环境：</strong>安装 Docker Engine 与 Docker Compose 插件；克隆本仓库到服务器或本地。</li>
+        <li><strong>配置密钥：</strong>复制 <code>.env.example</code> 为 <code>.env</code>，填写 <code>MYSQL_*</code>、<code>JWT_SECRET</code>（长随机串）、<code>ADMIN_PASSWORD</code> 等；切勿将含真实密钥的 <code>.env</code> 提交到 Git。</li>
+        <li><strong>启动：</strong>在仓库根目录执行 <code>docker compose up -d --build</code>。</li>
+        <li><strong>验证：</strong>浏览器访问 <code>http://主机:HTTP_PORT</code>（默认 <code>8090</code>，见 <code>.env</code> 中 <code>HTTP_PORT</code>）；打开 <code>/api/health</code> 应返回 <code>{"ok":true}</code>。</li>
+        <li><strong>更新代码：</strong>拉取新代码后执行 <code>docker compose up -d --build</code>；若仅改 API，可 <code>docker compose up -d --build api</code>。</li>
+        <li><strong>生产加强：</strong>为 API 容器设置 <code>NODE_ENV=production</code>；配置 HTTPS 终端（CDN / Nginx / Caddy）并启用 HSTS；按需设置 <code>CORS_ORIGIN</code>。详见下文「安全」与仓库根目录 <code>SECURITY.md</code>。</li>
+      </ol>
+
+      <h2 id="env">7. 环境变量说明</h2>
+      <p>以下变量多由根目录 <code>.env</code> 注入 Compose（见 <code>docker-compose.yml</code>）。本地直连 Node 时可使用 <code>server/.env</code>（参考 <code>server/.env.example</code>）。</p>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>变量</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>HTTP_PORT</code></td>
+            <td>宿主机映射 Nginx 80 的端口（默认 8090）。</td>
+          </tr>
+          <tr>
+            <td><code>MYSQL_ROOT_PASSWORD</code> / <code>MYSQL_PASSWORD</code></td>
+            <td>数据库 root 与应用用户密码；上线必须修改默认值。</td>
+          </tr>
+          <tr>
+            <td><code>JWT_SECRET</code></td>
+            <td>签名 JWT 的密钥，越长越随机越好；生产环境且 <code>NODE_ENV=production</code> 时，使用弱/占位密钥将导致 API 拒绝启动。</td>
+          </tr>
+          <tr>
+            <td><code>ADMIN_USERNAME</code> / <code>ADMIN_PASSWORD</code></td>
+            <td>空库首次启动时创建的初始管理员；已有数据不会自动改密。</td>
+          </tr>
+          <tr>
+            <td><code>CORS_ORIGIN</code></td>
+            <td>可选。逗号分隔的允许源（完整 URL）；限制浏览器跨域调用 API。同域部署可不设。</td>
+          </tr>
+          <tr>
+            <td><code>NODE_ENV</code></td>
+            <td>设为 <code>production</code> 时启用更严限流与 JWT 强密钥校验（建议在 API 服务上设置）。</td>
+          </tr>
+          <tr>
+            <td><code>BLOG_TITLE</code> / <code>BLOG_DESCRIPTION</code></td>
+            <td>站点标题与 meta 描述（接口 <code>/api/site</code>）。</td>
+          </tr>
+          <tr>
+            <td><code>SITE_OWNER_NAME</code></td>
+            <td>顶栏时段问候用显示名（可留空）。</td>
+          </tr>
+          <tr>
+            <td><code>JUHE_WEATHER_KEY</code> 等</td>
+            <td>首页天气；密钥仅服务端使用。缓存与每日额度见 <code>JUHE_WEATHER_DAILY_LIMIT</code>、<code>WEATHER_CACHE_TTL_MS</code>。</td>
+          </tr>
+          <tr>
+            <td><code>UPLOAD_DIR</code></td>
+            <td>API 容器内上传目录；Compose 中通常挂载到 <code>./public/uploads</code>。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="security">8. 安全与生产检查</h2>
+      <ul>
+        <li>服务端：<strong>参数化 SQL</strong>、<strong>JWT 固定 HS256</strong>、<strong>Helmet 部分头</strong>、<strong>登录/注册/上传/写文限流</strong>、<strong>上传文件魔数校验</strong>、<strong>文章与标签长度/数量校验</strong>。</li>
+        <li>Nginx：<strong>X-Frame-Options</strong>、<strong>X-Content-Type-Options</strong>、<strong>Referrer-Policy</strong>、<strong>Permissions-Policy</strong>；禁止访问 <code>/uploads/</code> 下以 <code>.</code> 开头的路径（含天气状态文件）。</li>
+        <li>Markdown 正文经 <strong>DOMPurify</strong> 净化后渲染；作者属于信任边界，仍建议勿粘贴不可信来源的复杂 HTML。</li>
+        <li>完整清单、残余风险与报告方式见仓库根目录 <strong><code>SECURITY.md</code></strong>。</li>
+      </ul>
+
+      <h2 id="features">9. 功能与页面</h2>
+      <table class="doc-table">
+        <thead>
+          <tr>
+            <th>路径</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>index.html</code></td>
+            <td>已发布文章列表、标签筛选；访客只读。</td>
+          </tr>
+          <tr>
+            <td><code>post.html?id=</code></td>
+            <td>文章详情；Markdown 渲染。</td>
+          </tr>
+          <tr>
+            <td><code>admin.html</code></td>
+            <td>登录/注册、文章列表（普通用户仅自己的；管理员全部）。</td>
+          </tr>
+          <tr>
+            <td><code>write.html</code></td>
+            <td>新建/编辑 Markdown、标签（预设 IT 向 + 自定义图标）、可见性（发布/草稿二选一）、图片上传插入。</td>
+          </tr>
+          <tr>
+            <td><code>profile.html</code></td>
+            <td>登录用户资料；<code>?u=登录名</code> 为公开访客视图。</td>
+          </tr>
+          <tr>
+            <td><code>博客说明.html</code></td>
+            <td>本说明与部署指南。</td>
+          </tr>
+          <tr>
+            <td><code>/api/health</code></td>
+            <td>健康检查，供 Compose / 监控探测。</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2 id="structure">10. 仓库目录结构</h2>
+      <ul>
+        <li><code>docker-compose.yml</code> — 服务定义、环境变量、卷、健康检查。</li>
+        <li><code>nginx/default.conf</code> — 静态根目录、<code>/api/</code> 反代、安全头、上传体积限制、隐藏文件规则。</li>
+        <li><code>server/</code> — API 源码、<code>Dockerfile</code>、<code>package.json</code>、<code>schema.sql</code>、迁移脚本。</li>
+        <li><code>public/</code> — 前端页面、<code>styles.css</code>、<code>js/</code>、<code>uploads/</code>（用户上传，勿清空生产数据时误删）。</li>
+        <li><code>部署说明.txt</code> — 纯文本快速部署与安全提示。</li>
+        <li><code>SECURITY.md</code> — 安全专项说明。</li>
+      </ul>
+
+      <h2 id="dev-api">11. 本地开发 API（不经过 Docker）</h2>
+      <p>安装 Node 18+ 与可访问的 MySQL，在 <code>server</code> 目录执行 <code>npm install</code>，复制 <code>server/.env.example</code> 为 <code>server/.env</code> 并填写连接信息，运行 <code>npm start</code>。前端可将 <code>public/js/api-base.js</code> 中的 API 根地址指向本地端口进行联调（注意 CORS 与同源策略）。</p>
+
+      <h2 id="troubleshoot">12. 常见问题</h2>
+      <ul>
+        <li><strong>Cannot POST /api/auth/register</strong>：多为 API 镜像未重建，执行 <code>docker compose up -d --build api</code>。</li>
+        <li><strong>502 Bad Gateway</strong>：API 未就绪或崩溃；查看 <code>docker compose logs api</code>。</li>
+        <li><strong>生产启动失败（JWT）</strong>：检查是否设置 <code>NODE_ENV=production</code> 却仍使用示例 <code>JWT_SECRET</code>；改为强随机串。</li>
+        <li><strong>天气不显示</strong>：未配置 <code>JUHE_WEATHER_KEY</code> 或上游额度用尽；接口会返回说明 JSON。</li>
+        <li><strong>docker 权限</strong>：需要 <code>sudo</code> 或将用户加入 <code>docker</code> 组。</li>
+      </ul>
+
+      <p><a class="btn btn-primary" href="index.html">返回首页</a></p>
+    </main>
+
+    <footer class="site-footer">
+      <p>图表由 Mermaid 渲染（CDN）；若被广告拦截扩展屏蔽，仍可依赖上文文字与 ASCII 示意。</p>
+    </footer>
+  </div>
+
+  <script type="module">
+    import { initBrandMetaBar, syncSiteHeader } from "./js/brand-meta-bar.js";
+    initBrandMetaBar();
+    void syncSiteHeader("docs");
+  </script>
+  <script type="module">
+    async function runMermaid() {
+      try {
+        const mod = await import("https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs");
+        const mermaid = mod.default;
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: "dark",
+          securityLevel: "loose",
+          themeVariables: {
+            primaryColor: "#0a1628",
+            primaryTextColor: "#e8f2ff",
+            lineColor: "#00f5d4",
+            secondaryColor: "#1a0a14",
+            tertiaryColor: "#030308",
+          },
+        });
+        await mermaid.run({ querySelector: ".mermaid" });
+      } catch (e) {
+        console.warn("[mermaid]", e);
+        document
+          .getElementById("doc-fallback-arch")
+          ?.removeAttribute("hidden");
+      }
+    }
+    void runMermaid();
+  </script>
+</body>
+</html>

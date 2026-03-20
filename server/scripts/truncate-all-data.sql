@@ -1,0 +1,8 @@
+-- 清空业务表（保留表结构）。执行后请重启 Node API，空库将按 ADMIN_PASSWORD 自动创建管理员。
+USE blog;
+SET FOREIGN_KEY_CHECKS = 0;
+TRUNCATE TABLE post_tags;
+TRUNCATE TABLE posts;
+TRUNCATE TABLE tags;
+TRUNCATE TABLE users;
+SET FOREIGN_KEY_CHECKS = 1;

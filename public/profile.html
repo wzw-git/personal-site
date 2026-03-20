@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="用户资料" />
+  <title>资料 · 博客</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="theme-flat">
+  <div class="bg" aria-hidden="true"></div>
+  <div class="wrap wrap--narrow">
+    <header class="site-header">
+      <div class="brand">
+        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
+          <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
+        </a>
+        <div class="brand-greeting-block">
+          <a class="brand-text" href="index.html">
+            <span id="brand-greeting">博客</span>
+          </a>
+          <p class="brand-bio" id="brand-bio" hidden></p>
+        </div>
+      </div>
+      <nav class="nav site-nav" id="site-nav" aria-label="主导航">
+        <a href="index.html" data-nav-page="home">文章</a>
+        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
+        <a href="博客说明.html" data-nav-page="docs">说明</a>
+        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
+        <button type="button" class="nav-btn" id="nav-logout" data-nav-auth hidden>退出</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="flat-panel">
+        <h1 class="flat-title" id="profile-heading">资料</h1>
+        <div id="profile-msg"></div>
+
+        <div id="profile-view" class="profile-view profile-card" hidden>
+          <div id="view-avatar" class="profile-card__avatar" aria-hidden="true"></div>
+          <div class="profile-card__under-avatar">
+            <p class="profile-display" id="view-display-name"></p>
+            <p class="profile-bio" id="view-bio"></p>
+            <p class="profile-meta profile-meta--handle" id="view-username"></p>
+          </div>
+        </div>
+
+        <div id="profile-edit" class="profile-edit profile-card" hidden>
+          <div class="profile-card__avatar-area">
+            <input type="file" id="pf-avatar-file" accept="image/jpeg,image/png,image/gif,image/webp" hidden />
+            <button
+              type="button"
+              class="profile-avatar-hit profile-avatar-hit--hero"
+              id="pf-avatar-hit"
+              aria-label="点击头像更换图片"
+            >
+              <span id="pf-avatar-slot" class="profile-avatar-slot" aria-hidden="true"></span>
+            </button>
+            <div class="profile-avatar-actions profile-avatar-actions--center">
+              <button type="button" class="profile-avatar-reset" id="pf-avatar-reset" hidden>
+                恢复默认图标
+              </button>
+            </div>
+            <p class="profile-avatar-hint profile-avatar-hint--center">
+              点击上方头像即可上传（JPEG / PNG / GIF / WebP，最大 10MB）；未上传时为默认图标。
+            </p>
+          </div>
+
+          <div class="profile-card__under-avatar profile-card__under-avatar--edit">
+            <div class="admin-field profile-field--flush">
+              <label for="pf-display">网名</label>
+              <input
+                type="text"
+                id="pf-display"
+                class="profile-input-display"
+                maxlength="32"
+                autocomplete="nickname"
+                placeholder="展示名（1～32 字）"
+              />
+            </div>
+            <div class="admin-field profile-field--flush">
+              <label for="pf-bio">个性签名</label>
+              <textarea
+                id="pf-bio"
+                class="profile-textarea-bio"
+                rows="4"
+                maxlength="512"
+                placeholder="一句话介绍自己…"
+              ></textarea>
+            </div>
+            <p class="profile-meta profile-meta--handle profile-login-line" id="pf-username-display" aria-live="polite">—</p>
+          </div>
+
+          <div class="profile-save-row">
+            <button type="button" class="btn btn-primary" id="pf-save">保存资料</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p><a href="index.html" style="color: var(--accent);">返回文章列表</a></p>
+    </footer>
+  </div>
+
+  <script type="module" src="js/profile-app.js"></script>
+</body>
+</html>

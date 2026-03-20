@@ -1,0 +1,115 @@
+================================================================================
+  个人博客站点 — 部署与安全说明（文本版）
+  更完整的图文、流程图与表格见浏览器打开：/博客说明.html
+================================================================================
+
+【一、系统是什么】
+  本仓库是一套可上线的个人博客，采用经典三层结构：
+
+    ┌──────────┐     ┌─────────────┐     ┌─────────────┐     ┌──────────┐
+    │  浏览器   │────►│   Nginx     │────►│ Node (API)  │────►│  MySQL   │
+    │ HTML/JS  │     │ 静态 + 反代  │     │  Express    │     │  持久化   │
+    └──────────┘     └─────────────┘     └─────────────┘     └──────────┘
+                            │                    │
+                            │                    └──►（可选）聚合数据天气 HTTPS
+                            └──► public/ 下 CSS/JS/图片/上传文件
+
+  · MySQL：独立数据库服务（Compose 中为 mysql 容器），负责用户、文章、标签。
+  · Node：仅处理 /api/*（JSON、上传、鉴权）；不托管静态首页。
+  · Nginx：root 指向 public/；location /api/ 反向代理到 API 容器。
+
+  重要：Nginx 不能替代 MySQL，二者在 Compose 里是并列服务。
+
+--------------------------------------------------------------------------------
+【二、技术栈与工具一览】
+  运行时        Node.js 18+
+  Web 框架      Express 4
+  数据库        MySQL 8.0，驱动 mysql2（参数化查询）
+  容器编排      Docker、Docker Compose
+  反向代理      Nginx（Alpine 镜像），gzip，client_max_body_size
+  鉴权          jsonwebtoken（算法 HS256）、bcryptjs
+  HTTP 安全     helmet（API 响应头）、cors、express-rate-limit
+  上传          multer + 文件头魔数校验（JPEG/PNG/GIF/WebP）
+  前端          ES Modules、Marked、DOMPurify（Markdown + XSS 净化）
+  字体          Google Fonts（Orbitron / Rajdhani / Share Tech Mono 等）
+  可选          聚合数据「简单天气」—— 密钥仅服务端环境变量
+
+--------------------------------------------------------------------------------
+【三、一键启动流程（概念）】
+
+  1. docker compose up -d --build
+  2. mysql 健康检查通过
+  3. api 镜像构建并启动，/api/health 返回 200
+  4. nginx 启动，映射 HTTP_PORT（默认 8090）→ 容器 80
+
+  代码或路由更新后务必重建 API 镜像，否则易出现 Cannot POST /api/...：
+    docker compose up -d --build
+    或仅：docker compose up -d --build api
+
+--------------------------------------------------------------------------------
+【四、目录与配置文件】
+  docker-compose.yml    MySQL / api / nginx 服务、环境变量、卷、健康检查
+  nginx/default.conf      静态根目录、/api/ 反代、安全响应头、上传目录隐藏文件规则
+  server/                 API 源码、Dockerfile、package.json、schema 与迁移
+  public/                 前端页面、styles.css、js/、uploads/（用户上传）
+  .env.example            复制为 .env 后填写密钥（勿提交含真实值的 .env）
+  server/.env.example     本地直接 node 跑 API 时用
+  SECURITY.md             安全加固清单、上线检查、残余风险
+  博客说明.html           站内详细说明（含 Mermaid 流程图，需浏览器打开）
+
+--------------------------------------------------------------------------------
+【五、访问入口（默认端口见 .env 中 HTTP_PORT）】
+  文章列表        /index.html
+  文章详情        /post.html?id=数字ID
+  后台列表/登录   /admin.html
+  Markdown 写作   /write.html
+  个人资料        /profile.html（公开页可加 ?u=登录名）
+  本说明          /博客说明.html
+  API 健康检查    /api/health
+
+--------------------------------------------------------------------------------
+【六、环境变量（务必修改默认值后再上线）】
+  HTTP_PORT              宿主机访问端口，默认 8090
+  MYSQL_ROOT_PASSWORD    root 密码
+  MYSQL_PASSWORD         应用用户 blog 的密码
+  JWT_SECRET             随机长字符串；生产 NODE_ENV=production 时弱密钥会导致 API 拒绝启动
+  ADMIN_USERNAME         初始管理员登录名（默认 admin）
+  ADMIN_PASSWORD         初始管理员密码（默认 changeme，必须改）
+  CORS_ORIGIN            可选，逗号分隔的允许前端源（完整 URL），API 单独暴露时建议设置
+  NODE_ENV               生产建议对 API 设为 production
+  BLOG_TITLE             站点标题（/api/site）
+  BLOG_DESCRIPTION       meta 描述
+  SITE_OWNER_NAME        顶栏时段问候用显示名
+  JUHE_WEATHER_KEY       可选，天气接口 key
+  JUHE_WEATHER_CITY      默认城市名
+  JUHE_WEATHER_DAILY_LIMIT / WEATHER_CACHE_TTL_MS   天气额度与缓存
+
+--------------------------------------------------------------------------------
+【七、安全（上线前必读）】
+  1. 修改 JWT_SECRET、MYSQL_*、ADMIN_PASSWORD，勿使用仓库或 compose 占位值。
+  2. 生产环境为 API 设置 NODE_ENV=production，启用强 JWT 校验与更严限流。
+  3. 对外服务应使用 HTTPS，并配置 Strict-Transport-Security（在 TLS 终端）。
+  4. 若 API 与前端不同源，设置 CORS_ORIGIN 限制浏览器跨域调用。
+  5. 上传目录 public/uploads 仅通过 Web 暴露；已禁止访问 /uploads/ 下点开头的文件。
+  6. 细节与威胁说明见 SECURITY.md；站内长文见 博客说明.html「安全与生产检查」一节。
+
+--------------------------------------------------------------------------------
+【八、已有主机 Nginx 时的思路】
+  root  指向本仓库 public/（不要用仓库根目录）
+  location /api/ {
+    proxy_pass http://127.0.0.1:API实际监听地址;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+--------------------------------------------------------------------------------
+【九、常见问题】
+  · docker 命令需 sudo：sudo docker compose … 或将用户加入 docker 组
+  · 502：API 未就绪，docker compose logs api
+  · 注册 POST 404/405：未重建 API 镜像，见第三节
+
+================================================================================
+  文档版本：与当前仓库功能同步（含安全加固、说明页流程图、环境变量说明）
+================================================================================

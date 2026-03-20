@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <script>
+    (function () {
+      try {
+        if (
+          localStorage.getItem("blog_admin_token") &&
+          window.location.hash !== "#login"
+        ) {
+          document.documentElement.classList.add("admin-token-present");
+        }
+      } catch (_) {}
+    })();
+  </script>
+  <title>写文章 · 博客</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="js/vendor/marked.umd.min.js"></script>
+  <script defer src="js/vendor/purify.min.js"></script>
+</head>
+<body class="theme-flat">
+  <div class="bg" aria-hidden="true"></div>
+  <div
+    id="admin-toast"
+    class="admin-toast"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+    hidden
+  ></div>
+  <div class="wrap admin-wrap">
+    <header class="site-header">
+      <div class="brand brand--home-meta">
+        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
+          <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
+        </a>
+        <div class="brand-main">
+          <div class="brand-greeting-block">
+            <a class="brand-text" href="index.html">
+              <span id="brand-greeting">博客</span>
+            </a>
+            <p class="brand-bio" id="brand-bio" hidden></p>
+          </div>
+          <div class="brand-meta" aria-live="polite">
+            <time id="home-datetime" datetime=""></time>
+            <span class="brand-meta__sep" aria-hidden="true">·</span>
+            <span id="home-weather">天气加载中…</span>
+          </div>
+        </div>
+      </div>
+      <nav class="nav site-nav" id="site-nav" aria-label="主导航">
+        <a href="index.html" data-nav-page="home">文章</a>
+        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
+        <a href="博客说明.html" data-nav-page="docs">说明</a>
+        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
+        <button type="button" class="nav-btn" id="btn-logout" data-nav-auth hidden>退出</button>
+      </nav>
+    </header>
+
+    <section
+      id="panel-auth"
+      class="auth-panel card flat-card"
+      aria-label="账户"
+    >
+      <div class="auth-tabstrip" role="tablist" aria-label="登录或注册">
+        <button type="button" class="auth-tab is-active" id="tab-login" role="tab" aria-selected="true" aria-controls="form-login-wrap">登录</button>
+        <button type="button" class="auth-tab" id="tab-register" role="tab" aria-selected="false" aria-controls="form-register-wrap">注册</button>
+      </div>
+      <div id="form-login-wrap" class="auth-form is-active" role="tabpanel" aria-labelledby="tab-login">
+        <div id="login-msg"></div>
+        <div class="admin-field">
+          <label for="username">用户名</label>
+          <input type="text" id="username" name="username" autocomplete="username" placeholder="登录名" />
+        </div>
+        <div class="admin-field">
+          <label for="password">密码</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" placeholder="••••••••" />
+        </div>
+        <button type="button" class="btn btn-primary auth-submit" id="btn-login">登录</button>
+      </div>
+      <div id="form-register-wrap" class="auth-form" role="tabpanel" aria-labelledby="tab-register" hidden>
+        <div id="register-msg"></div>
+        <div class="admin-field">
+          <label for="reg-username">用户名</label>
+          <input type="text" id="reg-username" name="reg-username" autocomplete="username" placeholder="2～32 位，字母数字下划线或中文" />
+        </div>
+        <div class="admin-field">
+          <label for="reg-password">密码</label>
+          <input type="password" id="reg-password" name="reg-password" autocomplete="new-password" placeholder="至少 6 位" />
+        </div>
+        <div class="admin-field">
+          <label for="reg-password2">确认密码</label>
+          <input type="password" id="reg-password2" name="reg-password2" autocomplete="new-password" placeholder="再次输入" />
+        </div>
+        <button type="button" class="btn btn-primary auth-submit" id="btn-register">注册</button>
+      </div>
+    </section>
+
+    <main id="panel-main" hidden>
+      <div id="main-msg"></div>
+      <nav class="write-breadcrumb" aria-label="写作导航">
+        <a href="admin.html" class="write-breadcrumb__link" id="write-back-list">← 文章列表</a>
+      </nav>
+
+      <section class="admin-editor card flat-card" id="editor-section">
+        <input type="hidden" id="edit-id" value="" />
+        <div class="admin-field">
+          <label for="f-title">标题</label>
+          <input type="text" id="f-title" />
+        </div>
+        <div class="admin-field admin-tags-field">
+          <span class="admin-field__label">标签</span>
+          <p class="admin-tags-hint">
+            以下为开发与工程类预设标签，点击即可选用；若没有合适的，点「添加自定义」从下列 IT 主题图标中选一个并填写标签文字。
+          </p>
+          <div
+            class="admin-tag-preset-row"
+            role="group"
+            aria-label="预设标签与添加自定义"
+          >
+            <div class="admin-tag-preset-grid" id="tag-preset-grid"></div>
+            <button type="button" class="btn btn-tag-add-toggle" id="btn-tag-toggle-custom">
+              ＋ 添加自定义标签
+            </button>
+          </div>
+          <div class="admin-tag-custom-block" id="tag-custom-block" hidden>
+            <p class="admin-tag-custom-label">选择图标（开发 / 测试 / 运维等，仅下列可选）</p>
+            <div class="admin-tag-icon-pick" id="tag-custom-icon-grid" role="group" aria-label="自定义标签图标"></div>
+            <div class="admin-tag-custom-inputs">
+              <input type="text" id="f-tag-custom-name" class="admin-tag-custom-name" maxlength="32" placeholder="标签文字" aria-label="自定义标签文字" />
+              <button type="button" class="btn btn-primary" id="btn-tag-custom-add">加入</button>
+              <button type="button" class="btn" id="btn-tag-custom-cancel">取消</button>
+            </div>
+          </div>
+          <div class="admin-tag-selected" id="tag-selected-chips" aria-live="polite"></div>
+          <input type="hidden" id="f-tags" value="" />
+        </div>
+        <div class="admin-field md-editor-field">
+          <span class="md-editor-field__label" id="f-body-label">正文（Markdown）</span>
+          <div class="md-editor-shell">
+            <div class="md-editor-topbar">
+              <div class="md-mode-tabs" role="tablist" aria-label="编辑视图">
+                <button type="button" class="md-mode-tab is-active" data-md-mode="split" role="tab" aria-selected="true">分栏</button>
+                <button type="button" class="md-mode-tab" data-md-mode="edit" role="tab" aria-selected="false">编辑</button>
+                <button type="button" class="md-mode-tab" data-md-mode="preview" role="tab" aria-selected="false">预览</button>
+              </div>
+              <div class="md-image-row">
+                <label class="md-insert-img-btn" for="f-image" title="从本机选择图片（最大 10MB）">插入图片</label>
+                <span class="md-paste-hint">可在编辑框内 <strong>粘贴截图</strong> 自动上传</span>
+                <input type="file" id="f-image" accept="image/jpeg,image/png,image/gif,image/webp" hidden />
+              </div>
+            </div>
+            <div class="md-panes md-panes--split" id="md-panes">
+              <div class="md-pane md-pane--editor">
+                <textarea id="f-body" class="md-textarea" rows="1" aria-labelledby="f-body-label" spellcheck="false" placeholder="在此编写 Markdown…"></textarea>
+              </div>
+              <div class="md-pane md-pane--preview" aria-label="Markdown 实时预览">
+                <div id="md-preview" class="md-preview prose" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <fieldset class="admin-field admin-post-visibility" aria-label="文章可见性">
+          <div class="admin-post-visibility__options">
+            <label class="admin-check">
+              <input
+                type="radio"
+                name="post-visibility"
+                id="f-visibility-live"
+                value="live"
+                checked
+              />
+              发布（访客可见）
+            </label>
+            <label class="admin-check">
+              <input type="radio" name="post-visibility" id="f-visibility-draft" value="draft" />
+              草稿（列表隐藏）
+            </label>
+          </div>
+        </fieldset>
+        <div class="write-editor-toolbar" role="group" aria-label="保存与离开">
+          <button type="button" class="write-toolbar-btn write-toolbar-btn--primary" id="btn-save">
+            保存
+          </button>
+          <button type="button" class="write-toolbar-btn write-toolbar-btn--ghost" id="btn-discard-edit" hidden>
+            取消编辑
+          </button>
+          <button type="button" class="write-toolbar-btn write-toolbar-btn--outline" id="btn-clear-draft" hidden>
+            清空草稿
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 离开编辑页前未保存确认（与站点风格一致，替代原生 confirm） -->
+  <div
+    id="leave-confirm-dialog"
+    class="modal-leave"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="leave-confirm-title"
+    aria-describedby="leave-confirm-desc"
+  >
+    <button type="button" class="modal-leave__backdrop" aria-label="留在本页"></button>
+    <div class="modal-leave__panel card flat-card">
+      <h2 id="leave-confirm-title" class="modal-leave__title">尚未保存</h2>
+      <p id="leave-confirm-desc" class="modal-leave__body">
+        当前内容尚未保存，确定要离开吗？未保存的修改将丢失。
+      </p>
+      <div class="modal-leave__actions">
+        <button type="button" class="modal-leave__btn modal-leave__btn--primary" id="leave-confirm-stay">
+          留在本页
+        </button>
+        <button type="button" class="modal-leave__btn modal-leave__btn--ghost" id="leave-confirm-leave">
+          仍要离开
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="md-img-lightbox" class="md-img-lightbox" hidden role="dialog" aria-modal="true" aria-label="图片放大预览">
+    <button type="button" class="md-img-lightbox__backdrop" aria-label="关闭预览"></button>
+    <figure class="md-img-lightbox__panel">
+      <button type="button" class="md-img-lightbox__close" aria-label="关闭">×</button>
+      <img id="md-img-lightbox-img" class="md-img-lightbox__img" alt="" />
+    </figure>
+  </div>
+
+  <script type="module" src="js/write-app.js"></script>
+</body>
+</html>
