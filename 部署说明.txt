@@ -55,6 +55,9 @@
   .env.example            复制为 .env 后填写密钥（勿提交含真实值的 .env）
   server/.env.example     本地直接 node 跑 API 时用
   SECURITY.md             安全加固清单、上线检查、残余风险
+  README.md               GitHub 首页项目说明与快速开始
+  docs/MIGRATION.md       换云服务器迁移（备份、恢复、HTTPS、排错）
+  scripts/backup-for-migration.sh  迁出前一键 mysqldump + 打包 uploads
   博客说明.html           站内详细说明（含 Mermaid 流程图，需浏览器打开）
 
 --------------------------------------------------------------------------------

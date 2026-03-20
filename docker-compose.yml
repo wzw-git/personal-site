@@ -1,7 +1,7 @@
 # 个人博客：MySQL + Node API + Nginx
 # 使用：在 personal-site 目录执行
 #   docker compose up -d --build
-# 访问：http://localhost:8080 （端口见 HTTP_PORT）
+# 访问：http://localhost:HTTP_PORT （默认 8090，见 .env）
 # 后台列表：/admin.html  编辑正文：/write.html  默认 admin / changeme（务必修改环境变量）
 
 services:
