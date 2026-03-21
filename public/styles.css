@@ -592,6 +592,7 @@ section h2 {
 
 /* 使用 article，避免整块卡片 <a> 内再嵌套作者资料链接（非法嵌套会导致 DOM 错乱） */
 .post-card {
+  position: relative;
   display: block;
   margin: 0;
   padding: 1.35rem 1.5rem;
@@ -605,6 +606,11 @@ section h2 {
 .post-card:hover {
   transform: translateY(-3px);
   border-color: rgba(94, 234, 212, 0.28);
+}
+
+/* Vue 首页：除标题区 RouterLink、作者链接外，点卡片空白/标签也进入正文 */
+.post-card--clickable {
+  cursor: pointer;
 }
 
 .post-card__hit {
@@ -682,6 +688,19 @@ section h2 {
 
 .post-article {
   padding-bottom: 2rem;
+  /* 标题、正文、评论区、页脚同一阅读栏宽，与正文对齐 */
+  --post-readable-width: min(100%, 48rem);
+}
+
+.post-article > .post-header,
+.post-article > #post-body.prose,
+.post-article > .vue-comment-panel.auth-panel,
+.post-article > .post-footer {
+  max-width: var(--post-readable-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .post-header {
@@ -726,6 +745,164 @@ section h2 {
   margin-top: 2.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid var(--stroke);
+}
+
+/* Vue 评论区：与 .post-article 内正文同宽；显式 max-width 盖过历史上全局 .auth-panel 的登录卡限宽 */
+.vue-comment-panel.auth-panel {
+  max-width: var(--post-readable-width, min(100%, 48rem));
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 1.75rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.1rem 1.25rem 1.2rem;
+  border-radius: 16px;
+}
+
+.vue-comment-panel__title {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.vue-comment-thread {
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.vue-comment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.vue-comment-item {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.vue-comment-item:last-child {
+  border-bottom: none;
+}
+
+.vue-comment-item__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.65rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.86rem;
+}
+
+.vue-comment-item__author {
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.vue-comment-item__author--guest {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.vue-comment-item__author:hover {
+  color: var(--accent-2);
+  text-decoration: underline;
+}
+
+.vue-comment-item__time {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.vue-comment-item__del {
+  margin-left: auto;
+  padding: 0.2rem 0.55rem;
+  font-family: inherit;
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--stroke);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.vue-comment-item__del:hover {
+  color: #fca5a5;
+  border-color: rgba(252, 165, 165, 0.45);
+}
+
+.vue-comment-item__body {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.vue-comment-empty {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.vue-comment-login-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.vue-comment-login-hint a {
+  color: var(--accent);
+}
+
+/* 与 .auth-form 一致：纵向排列；复用 .admin-field / .auth-submit */
+.vue-comment-write {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.vue-comment-panel .vue-comment-field.admin-field {
+  margin-bottom: 0;
+}
+
+/* 覆盖全局 .admin-field textarea 的 min-height:220px，避免评论框巨高 */
+.vue-comment-panel textarea.vue-comment-textarea {
+  min-height: 5.25rem;
+  max-height: 12rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.vue-comment-panel .vue-comment-field textarea:focus-visible {
+  outline: none;
+  border-color: rgba(94, 234, 212, 0.45);
+  box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.12);
+}
+
+.vue-comment-panel .admin-msg {
+  margin-top: 0.25rem;
+  margin-bottom: 0;
+  max-height: 7rem;
+  overflow: auto;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 /* Markdown 正文 */
@@ -926,9 +1103,8 @@ section h2 {
   max-width: var(--max);
 }
 
-/* 登录 / 注册卡片 */
+/* 登录 / 注册卡片（评论区 .vue-comment-panel 不复用 26rem 限宽，见 :not 规则） */
 .auth-panel {
-  max-width: 26rem;
   margin: 2.5rem auto;
   padding: 1.65rem 1.45rem 1.4rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -941,6 +1117,10 @@ section h2 {
   box-shadow:
     0 1px 0 rgba(255, 255, 255, 0.06) inset,
     0 22px 56px rgba(0, 0, 0, 0.45);
+}
+
+.auth-panel:not(.vue-comment-panel) {
+  max-width: 26rem;
 }
 
 .auth-tabstrip {
@@ -2761,6 +2941,69 @@ body.theme-flat .post-header__title {
   text-shadow:
     0 0 28px rgba(0, 245, 212, 0.45),
     0 0 60px rgba(255, 0, 110, 0.12);
+}
+
+/* 评论区沿用 auth-panel 圆角，不用 flat-card 的直角与 clip-path */
+body.theme-flat .vue-comment-panel.auth-panel {
+  border-radius: 16px;
+  clip-path: none;
+  border-color: rgba(0, 245, 212, 0.22);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+}
+
+body.theme-flat .vue-comment-panel__title {
+  font-family: var(--font-body);
+  font-weight: 600;
+  color: var(--text);
+  text-shadow: none;
+}
+
+body.theme-flat .vue-comment-thread {
+  border-bottom-color: rgba(0, 245, 212, 0.14);
+}
+
+body.theme-flat .vue-comment-item {
+  border-bottom-color: rgba(0, 245, 212, 0.08);
+}
+
+body.theme-flat .vue-comment-item__author {
+  font-family: var(--font-body);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+body.theme-flat .vue-comment-item__time {
+  text-transform: none;
+  letter-spacing: 0.03em;
+}
+
+body.theme-flat .vue-comment-item__del {
+  border-radius: 8px;
+  border-color: rgba(255, 0, 110, 0.28);
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+body.theme-flat .vue-comment-panel textarea.vue-comment-textarea {
+  border-radius: 10px;
+  border-color: rgba(0, 245, 212, 0.28);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+body.theme-flat .vue-comment-panel textarea.vue-comment-textarea:focus-visible {
+  border-color: rgba(0, 245, 212, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 245, 212, 0.12);
+}
+
+/* 勿用后台全局 admin-field label 的大写窄字距 */
+body.theme-flat .vue-comment-panel .admin-field label {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 body.theme-flat .user-avatar {

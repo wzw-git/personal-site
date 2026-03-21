@@ -8,9 +8,10 @@
 |------|------|
 | **JWT** | 签发/校验固定为 `HS256`；生产环境（`NODE_ENV=production`）若未设置或使用已知弱 `JWT_SECRET` 则进程退出。 |
 | **CORS** | 可通过 `CORS_ORIGIN` 设为逗号分隔的允许源；未设置时在开发/同域场景下仍反射 `Origin`（生产同域可接受，API 单独暴露时务必限制）。 |
-| **限流** | 登录/注册/上传/文章写操作均有 `express-rate-limit`；生产环境阈值更严。 |
+| **限流** | 登录/注册/上传/文章写操作均有 `express-rate-limit`；**发表评论**单独限流；生产环境阈值更严。 |
 | **上传** | Multer 限制类型与大小；落盘后按文件头魔数校验 JPEG/PNG/GIF/WebP，与 MIME 不一致则删除并拒绝。 |
 | **文章载荷** | 标题/正文长度上限；标签数量与单标签长度限制；禁止控制字符；`published`+`draft` 同时真时规范为草稿。 |
+| **评论** | 仅登录用户可发；正文非空、长度上限、禁止控制字符；删除仅限作者本人或管理员。 |
 | **密码** | 注册密码长度上限 128，减轻 bcrypt 滥用成本。 |
 | **HTTP 头** | Helmet（禁用 CSP JSON 接口不适用）；`Referrer-Policy`、`CORP` 等；Nginx 增加 `X-Frame-Options`、`X-Content-Type-Options`、`Permissions-Policy` 等。 |
 | **SQL** | 查询均使用参数化，未发现字符串拼接用户输入进 SQL。 |

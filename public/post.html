@@ -3,63 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="博客文章" />
-  <title>文章 · 博客</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="styles.css" />
-  <!-- 可选：将 UMD 放入 public/js/vendor/ 后优先使用，无需动态 import / 外网 CDN -->
-  <script defer src="js/vendor/marked.umd.min.js"></script>
-  <script defer src="js/vendor/purify.min.js"></script>
+  <base href="/" />
+  <title>跳转中…</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search).get("id");
+      if (q && /^\d+$/.test(q)) {
+        location.replace(location.pathname.replace(/[^/]*$/, "") + "post/" + q);
+        return;
+      }
+      location.replace(location.pathname.replace(/[^/]*$/, "") || "/");
+    })();
+  </script>
 </head>
 <body class="theme-flat">
-  <div class="bg" aria-hidden="true"></div>
-  <div class="wrap wrap--narrow">
-    <header class="site-header">
-      <div class="brand">
-        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
-          <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
-        </a>
-        <div class="brand-greeting-block">
-          <a class="brand-text" href="index.html">
-            <span id="brand-greeting">博客</span>
-          </a>
-          <p class="brand-bio" id="brand-bio" hidden></p>
-        </div>
-      </div>
-      <nav class="nav site-nav" id="site-nav" aria-label="主导航">
-        <a href="index.html" data-nav-page="home">文章</a>
-        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
-        <a href="博客说明.html" data-nav-page="docs">说明</a>
-        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
-        <button type="button" class="nav-btn" id="nav-logout" data-nav-auth hidden>退出</button>
-      </nav>
-    </header>
-
-    <main>
-      <p id="post-error" class="post-error" hidden></p>
-
-      <article id="post-article" class="post-article">
-        <header class="post-header">
-          <h1 class="post-header__title" id="post-title">加载中…</h1>
-          <div class="post-header__meta">
-            <time id="post-date" datetime=""></time>
-            <span id="post-author" class="post-author" hidden></span>
-            <div class="post-header__tags" id="post-tags"></div>
-          </div>
-        </header>
-        <div class="prose" id="post-body"></div>
-        <footer class="post-footer">
-          <a class="btn btn-primary" href="index.html">← 返回列表</a>
-        </footer>
-      </article>
-    </main>
-
-    <footer class="site-footer">
-      <p>正文来自数据库中的 Markdown；外链在新标签打开。</p>
-    </footer>
-  </div>
-
-  <script type="module" src="js/post-view.js"></script>
+  <p style="padding: 2rem; color: var(--muted);">正在跳转到文章页…</p>
 </body>
 </html>

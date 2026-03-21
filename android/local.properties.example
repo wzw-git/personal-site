@@ -1,0 +1,6 @@
+# 复制为 local.properties 后按需修改（local.properties 勿提交仓库）
+# Android SDK 路径（Android Studio 首次同步后通常会自动写入）
+sdk.dir=/path/to/Android/Sdk
+
+# 博客线上根地址，须与网页访问地址一致（HTTPS），末尾不要路径时可不加斜杠
+blog.web.url=https://你的域名

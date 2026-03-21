@@ -2,6 +2,7 @@
 # 使用：在 personal-site 目录执行
 #   docker compose up -d --build
 # 访问：http://localhost:HTTP_PORT （默认 8090，见 .env）
+# 改 server 源码（含评论等 API）后须：docker compose up -d --build api
 # 后台列表：/admin.html  编辑正文：/write.html  默认 admin / changeme（务必修改环境变量）
 
 services:

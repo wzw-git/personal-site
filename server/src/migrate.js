@@ -58,6 +58,19 @@ async function runMigrations(pool, adminUsername) {
   await addColumnIgnoreDup(
     `ALTER TABLE users ADD COLUMN avatar_url VARCHAR(512) NULL`
   );
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS comments (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+      post_id INT UNSIGNED NOT NULL,
+      user_id INT UNSIGNED NOT NULL,
+      body VARCHAR(2000) NOT NULL,
+      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_comments_post_created (post_id, created_at),
+      CONSTRAINT fk_comments_post FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+      CONSTRAINT fk_comments_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
 }
 
 module.exports = { runMigrations };

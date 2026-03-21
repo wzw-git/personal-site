@@ -323,6 +323,14 @@ const postMutationLimiter = rateLimit({
   message: { error: "操作过于频繁，请稍后再试" },
 });
 
+const commentPostLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: IS_PRODUCTION ? 8 : 24,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "发表评论过于频繁，请稍后再试" },
+});
+
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const upload = multer({
@@ -442,6 +450,126 @@ app.get("/api/posts", async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: "读取文章列表失败" });
+  }
+});
+
+/** 已发布文章是否存在（供评论接口使用） */
+async function postIsPublicById(postId) {
+  const [rows] = await pool.query(
+    `SELECT id FROM posts WHERE id = ? AND published = 1 AND draft = 0`,
+    [postId]
+  );
+  return rows.length > 0;
+}
+
+/** 公开：某篇已发布文章的评论列表（时间正序） */
+app.get("/api/posts/id/:postId/comments", async (req, res) => {
+  try {
+    const postId = Number(req.params.postId);
+    if (!Number.isInteger(postId) || postId < 1) {
+      return res.status(400).json({ error: "id 不合法" });
+    }
+    if (!(await postIsPublicById(postId))) {
+      return res.status(404).json({ error: "文章不存在" });
+    }
+    const [rows] = await pool.query(
+      `SELECT c.id, c.body, c.created_at,
+              u.username AS author_username,
+              u.display_name AS author_display_name,
+              u.bio AS author_bio,
+              u.avatar_url AS author_avatar_url
+       FROM comments c
+       INNER JOIN users u ON u.id = c.user_id
+       WHERE c.post_id = ?
+       ORDER BY c.created_at ASC`,
+      [postId]
+    );
+    const comments = rows.map((r) => ({
+      id: r.id,
+      body: r.body,
+      date: formatDate(r.created_at),
+      author: authorFromPostRow({
+        author_username: r.author_username,
+        author_display_name: r.author_display_name,
+        author_bio: r.author_bio,
+        author_avatar_url: r.author_avatar_url,
+      }),
+    }));
+    res.json({ comments });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "读取评论失败" });
+  }
+});
+
+/** 登录用户对已发布文章发表评论 */
+app.post(
+  "/api/posts/id/:postId/comments",
+  authMiddleware,
+  commentPostLimiter,
+  async (req, res) => {
+    try {
+      const postId = Number(req.params.postId);
+      if (!Number.isInteger(postId) || postId < 1) {
+        return res.status(400).json({ error: "id 不合法" });
+      }
+      if (!(await postIsPublicById(postId))) {
+        return res.status(404).json({ error: "文章不存在" });
+      }
+      const raw = req.body?.body;
+      if (typeof raw !== "string") {
+        return res.status(400).json({ error: "评论内容无效" });
+      }
+      const text = raw.trim();
+      if (!text) {
+        return res.status(400).json({ error: "评论不能为空" });
+      }
+      if (text.length > 2000) {
+        return res.status(400).json({ error: "评论过长（最多 2000 字）" });
+      }
+      if (/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(text)) {
+        return res.status(400).json({ error: "评论含非法字符" });
+      }
+      const [ins] = await pool.query(
+        `INSERT INTO comments (post_id, user_id, body) VALUES (?, ?, ?)`,
+        [postId, req.user.id, text]
+      );
+      res.status(201).json({ id: ins.insertId });
+    } catch (e) {
+      console.error(e);
+      res.status(500).json({ error: "发表评论失败" });
+    }
+  }
+);
+
+/** 删除自己的评论；管理员可删任意评论 */
+app.delete("/api/comments/:id", authMiddleware, async (req, res) => {
+  try {
+    const cid = Number(req.params.id);
+    if (!Number.isInteger(cid) || cid < 1) {
+      return res.status(400).json({ error: "id 不合法" });
+    }
+    const [rows] = await pool.query(
+      `SELECT c.user_id FROM comments c WHERE c.id = ?`,
+      [cid]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ error: "评论不存在" });
+    }
+    if (
+      rows[0].user_id !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(403).json({ error: "无权删除" });
+    }
+    const [d] = await pool.query(`DELETE FROM comments WHERE id = ?`, [cid]);
+    if (d.affectedRows === 0) {
+      return res.status(404).json({ error: "评论不存在" });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "删除失败" });
   }
 });
 

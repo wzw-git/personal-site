@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <base href="/" />
   <meta name="description" content="个人博客：架构说明、技术栈、Docker 部署流程、安全与运维指南" />
   <title>说明与部署指南 · 博客</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
   <style>
     /* 说明页：目录与图表区域（与 theme-flat 协调） */
     .doc-page .doc-lead {
@@ -105,12 +106,12 @@
   <div class="wrap wrap--narrow doc-page">
     <header class="site-header">
       <div class="brand brand--home-meta">
-        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
+        <a class="brand-avatar-link" id="brand-avatar-link" href="/profile.html" data-nav-page="profile" aria-label="我的资料">
           <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
         </a>
         <div class="brand-main">
           <div class="brand-greeting-block">
-            <a class="brand-text" href="index.html">
+            <a class="brand-text" href="/">
               <span id="brand-greeting">博客</span>
             </a>
             <p class="brand-bio" id="brand-bio" hidden></p>
@@ -123,10 +124,10 @@
         </div>
       </div>
       <nav class="nav site-nav" id="site-nav" aria-label="主导航">
-        <a href="index.html" data-nav-page="home">文章</a>
-        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
-        <a href="博客说明.html" data-nav-page="docs" aria-current="page">说明</a>
-        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
+        <a href="/" data-nav-page="home">文章</a>
+        <a href="/admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
+        <a href="/博客说明.html" data-nav-page="docs" aria-current="page">说明</a>
+        <a href="/admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
         <button type="button" class="nav-btn" id="nav-logout" data-nav-auth hidden>退出</button>
       </nav>
     </header>
@@ -391,12 +392,12 @@ sequenceDiagram
         </thead>
         <tbody>
           <tr>
-            <td><code>index.html</code></td>
-            <td>已发布文章列表、标签筛选；访客只读。</td>
+            <td><code>/</code> 或 <code>index.html</code></td>
+            <td>已发布文章列表、标签筛选（Vue SPA 构建产物）；访客只读。</td>
           </tr>
           <tr>
-            <td><code>post.html?id=</code></td>
-            <td>文章详情；Markdown 渲染。</td>
+            <td><code>/post/:id</code>；旧 <code>post.html?id=</code></td>
+            <td>文章详情；Markdown 渲染；登录用户可发表评论。</td>
           </tr>
           <tr>
             <td><code>admin.html</code></td>
@@ -446,7 +447,7 @@ sequenceDiagram
         <li><strong>docker 权限</strong>：需要 <code>sudo</code> 或将用户加入 <code>docker</code> 组。</li>
       </ul>
 
-      <p><a class="btn btn-primary" href="index.html">返回首页</a></p>
+      <p><a class="btn btn-primary" href="/">返回首页</a></p>
     </main>
 
     <footer class="site-footer">
@@ -455,7 +456,7 @@ sequenceDiagram
   </div>
 
   <script type="module">
-    import { initBrandMetaBar, syncSiteHeader } from "./js/brand-meta-bar.js";
+    import { initBrandMetaBar, syncSiteHeader } from "/js/brand-meta-bar.js";
     initBrandMetaBar();
     void syncSiteHeader("docs");
   </script>

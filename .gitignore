@@ -2,6 +2,13 @@
 .env
 **/node_modules/
 
+# Android：SDK 路径与构建产物（gradle wrapper 可提交）
+android/local.properties
+android/.gradle/
+android/**/build/
+*.keystore
+android/**/keystore.properties
+
 # 用户上传（仅保留目录占位）
 public/uploads/*
 !public/uploads/.gitkeep

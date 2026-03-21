@@ -62,13 +62,20 @@
 
 --------------------------------------------------------------------------------
 【五、访问入口（默认端口见 .env 中 HTTP_PORT）】
-  文章列表        /index.html
-  文章详情        /post.html?id=数字ID
+  文章列表        / 或 /index.html（Vue 构建产物）
+  文章详情        /post/数字ID（推荐）；旧链接 post.html?id= 会跳转至上述路径
   后台列表/登录   /admin.html
   Markdown 写作   /write.html
   个人资料        /profile.html（公开页可加 ?u=登录名）
   本说明          /博客说明.html
   API 健康检查    /api/health
+
+  部署 public/ 时须包含 admin.html、write.html、profile.html、styles.css、js/ 等
+  全量文件；仅上传 index.html 与 assets/ 会导致 /admin.html 或子资源 404。
+  静态页已使用 <base href="/"> 与根路径 /styles.css、/js/…，适用于根路径部署。
+
+  评论功能依赖 API：更新代码后须执行 docker compose up -d --build api；
+  若发表评论返回 Cannot POST …/comments，说明运行中的 API 镜像仍为旧版。
 
 --------------------------------------------------------------------------------
 【六、环境变量（务必修改默认值后再上线）】

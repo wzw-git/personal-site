@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 根路径部署：固定站点根，避免 Safari 等在 admin.html#fragment 下把相对路径解析错导致 CSS/JS 404 -->
+  <base href="/" />
   <meta name="robots" content="noindex" />
   <!-- 已登录且非 #login 时抢先隐藏登录卡片，避免模块执行前闪一下登录区 -->
   <script>
@@ -20,7 +22,7 @@
   <title>文章列表 · 写作</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body class="theme-flat">
   <div class="bg" aria-hidden="true"></div>
@@ -36,12 +38,12 @@
   <div class="wrap admin-wrap">
     <header class="site-header">
       <div class="brand brand--home-meta">
-        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
+        <a class="brand-avatar-link" id="brand-avatar-link" href="/profile.html" data-nav-page="profile" aria-label="我的资料">
           <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
         </a>
         <div class="brand-main">
           <div class="brand-greeting-block">
-            <a class="brand-text" href="index.html">
+            <a class="brand-text" href="/">
               <span id="brand-greeting">博客</span>
             </a>
             <p class="brand-bio" id="brand-bio" hidden></p>
@@ -54,10 +56,10 @@
         </div>
       </div>
       <nav class="nav site-nav" id="site-nav" aria-label="主导航">
-        <a href="index.html" data-nav-page="home">文章</a>
-        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
-        <a href="博客说明.html" data-nav-page="docs">说明</a>
-        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
+        <a href="/" data-nav-page="home">文章</a>
+        <a href="/admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
+        <a href="/博客说明.html" data-nav-page="docs">说明</a>
+        <a href="/admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
         <button type="button" class="nav-btn" id="btn-logout" data-nav-auth hidden>退出</button>
       </nav>
     </header>
@@ -177,7 +179,7 @@
             文章列表
           </h2>
           <div class="admin-post-list-panel__tools">
-            <a href="write.html" class="admin-post-new">
+            <a href="/write.html" class="admin-post-new">
               <svg class="admin-post-new__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M12 5v14M5 12h14" />
               </svg>
@@ -206,6 +208,6 @@
     </main>
   </div>
 
-  <script type="module" src="js/admin-app.js"></script>
+  <script type="module" src="/js/admin-app.js"></script>
 </body>
 </html>

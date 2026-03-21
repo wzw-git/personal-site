@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">博客</string>
+    <string name="loading">加载中…</string>
+    <string name="err_network">网络异常，请下拉重试</string>
+    <string name="external_link_title">在浏览器中打开</string>
+</resources>

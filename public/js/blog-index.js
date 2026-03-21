@@ -67,7 +67,7 @@ function renderList() {
       (p) => `
     <li>
       <article class="post-card">
-        <a class="post-card__hit" href="post.html?id=${encodeURIComponent(String(p.id))}">
+        <a class="post-card__hit" href="/post/${encodeURIComponent(String(p.id))}">
           <time class="post-card__time" datetime="${esc(p.date)}">${esc(p.date)}</time>
           <h2 class="post-card__title">${esc(p.title)}</h2>
         </a>

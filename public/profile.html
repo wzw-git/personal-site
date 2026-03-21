@@ -3,32 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <base href="/" />
   <meta name="description" content="用户资料" />
   <title>资料 · 博客</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="/styles.css" />
 </head>
 <body class="theme-flat">
   <div class="bg" aria-hidden="true"></div>
   <div class="wrap wrap--narrow">
     <header class="site-header">
       <div class="brand">
-        <a class="brand-avatar-link" id="brand-avatar-link" href="profile.html" data-nav-page="profile" aria-label="我的资料">
+        <a class="brand-avatar-link" id="brand-avatar-link" href="/profile.html" data-nav-page="profile" aria-label="我的资料">
           <span class="brand-avatar-slot" id="brand-avatar-slot" aria-hidden="true"></span>
         </a>
         <div class="brand-greeting-block">
-          <a class="brand-text" href="index.html">
+          <a class="brand-text" href="/">
             <span id="brand-greeting">博客</span>
           </a>
           <p class="brand-bio" id="brand-bio" hidden></p>
         </div>
       </div>
       <nav class="nav site-nav" id="site-nav" aria-label="主导航">
-        <a href="index.html" data-nav-page="home">文章</a>
-        <a href="admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
-        <a href="博客说明.html" data-nav-page="docs">说明</a>
-        <a href="admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
+        <a href="/" data-nav-page="home">文章</a>
+        <a href="/admin.html" data-nav-page="write" data-nav-auth hidden>写作</a>
+        <a href="/博客说明.html" data-nav-page="docs">说明</a>
+        <a href="/admin.html#login" data-nav-page="login" data-nav-guest>登录</a>
         <button type="button" class="nav-btn" id="nav-logout" data-nav-auth hidden>退出</button>
       </nav>
     </header>
@@ -101,10 +102,10 @@
     </main>
 
     <footer class="site-footer">
-      <p><a href="index.html" style="color: var(--accent);">返回文章列表</a></p>
+      <p><a href="/" style="color: var(--accent);">返回文章列表</a></p>
     </footer>
   </div>
 
-  <script type="module" src="js/profile-app.js"></script>
+  <script type="module" src="/js/profile-app.js"></script>
 </body>
 </html>
