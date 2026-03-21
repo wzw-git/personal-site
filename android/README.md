@@ -2,6 +2,8 @@
 
 在 App 内打开与网页**同一站点**的 Vue 博客，列表、文章、评论、登录均走现有 `/api`，数据与网页端一致。
 
+**在 Mac 本机用 Android Studio 编译**：见同目录下的 **[BUILD_ON_MAC.md](./BUILD_ON_MAC.md)**。
+
 **说明**：WebView 使用**独立的** `localStorage`（`blog_admin_token` 等），与手机 Chrome 不共享。若要在 App 里发表评论或进后台，请在 App 内登录一次；账号与服务器端相同。
 
 ## 环境要求
